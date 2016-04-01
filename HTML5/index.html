@@ -27,7 +27,7 @@
 
 
 	microgear.on('message',function(topic,msg) {
-		if (topic=='/deerdev/irremote/ls/default') {
+		if (topic.indexOf('/irremote/ls/default')>=0) {
 			var m = msg.split(';');
 
 			var e = document.getElementById('remote');
@@ -38,7 +38,7 @@
 			}
 		}
 
-		if (topic=='/deerdev/irremote/new') {
+		if (topic.indexOf('/deerdev/irremote/new')>=0) {
 			var newname = prompt('Name your new button');
 			send('mv:'+msg+':'+'/default/'+newname);
 			send('ls:/default');
