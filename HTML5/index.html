@@ -1,9 +1,20 @@
-<script src="http://netpie.io/microgear.js"></script>
+<script src="https://netpie.io/microgear.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.2.3/jquery.js"></script>
+
+<!-- Latest compiled and minified CSS -->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+
+<!-- Optional theme -->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap-theme.min.css" integrity="sha384-fLW2N01lMqjakBkx3l/M9EahuwpSfeNvV63J5ezn3uZzapT0u7EYsXMjQV+0En5r" crossorigin="anonymous">
+
+<!-- Latest compiled and minified JavaScript -->
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script>
 
 <script>
 	const target = 'irremote';
 
     var appid, appkey, appsecret;
+	var thingsrc = 'default';
 
     var a = location.hash.substring(1).split(':');
     if (a.length==3) {
@@ -22,27 +33,62 @@
     });
 
   	function send(msg) {
-	  microgear.chat(target,msg);
+		var m = msg.split('/');
+/*		if(m.length==2 && m[0]!='' && m[1]!=''){
+			document.getElementById("dropdownMenu").innerHTML = m[1];
+			thingsrc = m[1];
+			var e = document.getElementById('remote');
+			e.innerHTML = "";
+		}
+*/
+		//if(msg=='new') msg+="/"+thingsrc;
+		microgear.chat(target,msg);
+		console.log(msg);
 	}
 
 
 	microgear.on('message',function(topic,msg) {
-		if (topic.indexOf('/irremote/ls/default')>=0) {
+		console.log(topic,msg);
+		if (topic=='/'+appid+'/irremote/ls/'+thingsrc) {
 			var m = msg.split(';');
 
 			var e = document.getElementById('remote');
 			e.innerHTML = "";
 
 			for (var i=0; i<m.length; i++) {
-				e.innerHTML += "<a href=\"#\" class=\"btn btn-blue\" onclick=\"send('ir:/default/"+m[i]+"')\">"+m[i]+"</a>";
+				e.innerHTML += "<div class=\"col-xs-6 col-md-6\" style=\"padding:10px\"><a class=\"btn btn-primary col-xs-12\" onclick=\"send('ir:/"+thingsrc+"/"+m[i]+"')\"  ontouch=\"send('ir:/"+thingsrc+"/"+m[i]+"')\">"+m[i]+"</a></div>";
+			}
+
+			document.getElementById("statusRemote").style.display = "block";
+		}
+/*
+		if (topic=='/'+appid+'/irremote/ls/') {
+			var m = msg.split(';');
+
+			var e = document.getElementById('ulMenu');
+			e.innerHTML = "";
+
+			for (var i=0; i<m.length; i++) {
+				if(i==0||m[i]=='default'){ 
+					send('ls:/'+m[i]); 
+					thingsrc = m[i];
+					document.getElementById("dropdownMenu").innerHTML = thingsrc;
+				}
+				e.innerHTML += "<li class=\"col-xs-12\"><a onclick=\"send('ls:/"+m[i]+"')\">"+m[i]+"</a></li>";
+			}
+			
+			document.getElementById("statusRemote").style.display = "block";
+		}
+*/
+		if (topic=='/'+appid+'/irremote/new') {
+			var newname = prompt('Name your new button');
+			if(newname){
+				send('mv:'+msg+':'+'/'+thingsrc+'/'+newname);
+				send('ls:/'+thingsrc);
 			}
 		}
 
-		if (topic.indexOf('/deerdev/irremote/new')>=0) {
-			var newname = prompt('Name your new button');
-			send('mv:'+msg+':'+'/default/'+newname);
-			send('ls:/default');
-		}
+
 	});
 
 	microgear.on('connected', function() {
@@ -52,62 +98,69 @@
 	});
 
 	microgear.connect(appid);
-	
 
 </script>
 
  <style>
 
-a { text-decoration: none; margin: 0 10px; }
-a.btn {
-	display: inline-block;
-	color: #666;
-	background-color: #eee;
-	text-transform: uppercase;
-	letter-spacing: 2px;
-	font-size: 20px;
-	padding: 5px 20px;
-	border-radius: 5px;
-	-moz-border-radius: 5px;
-	-webkit-border-radius: 5px;
-	border: 1px solid rgba(0,0,0,0.3);
-	border-bottom-width: 3px;
+a { text-decoration: none; cursor:pointer;}
+.btn-primary, .btn-success {
+    padding: 15px;
+	font-size:56px;
+}
+.dropdown, .btn, button, li {
+	font-size:56px;
 }
 
-a.btn:hover {
-	background-color: #e3e3e3;
-	border-color: rgba(0,0,0,0.5);
+a:active {
+	color:yellow;
 }
 
-a.btn:active {
-	background-color: #CCC;
-	border-color: rgba(0,0,0,0.9);
+#body {
+	padding:10px;
+	text-align:center;
+}
+#statusRemote{
+	display:none;
 }
 
-a.btn.btn-blue {
-	background-color: #699DB6;
-	border-color: rgba(0,0,0,0.3);
-	text-shadow: 0 1px 0 rgba(0,0,0,0.5);
-	color: #FFF;
-}
-
-a.btn.btn-blue:hover {
-	background-color: #4F87A2;
-	border-color: rgba(0,0,0,0.5);
-}
-
-a.btn.btn-blue:active {
-	background-color: #3C677B;
-	border-color: rgba(0,0,0,0.9);
-}
 </style>
 
-<div id="data" align=right><FONT COLOR=#DDDDDD>OFFLINE</FONT></div>
+<div id="body">
+	<div id="data" align="right"><FONT COLOR=#DDDDDD>OFFLINE</FONT></div>
+	<font style="font-size: 72px;font-weight: bold;">Cloud Remote Controller</font>
+	<div id="statusRemote">
+<!--		<div class="row">
+			<div class="col-xs-4" style="padding:10px;">
+				<div class="dropdown">
+					<button class="btn btn-default col-xs-12 dropdown-toggle" type="button" id="dropdownMenu" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+						Remote
+						<span class="caret"></span>
+					</button>
+					<ul class="dropdown-menu" aria-labelledby="dropdownMenu" id="ulMenu"></ul>
+				</div>
+			</div>
+			<div class="col-xs-8" style="padding:10px;">
+				<a class="btn btn-default col-xs-12" onclick="">Create Remote</a>
+			</div>
+		</div>
+-->
+		<div class="row">
+			<div class="col-xs-4" style="padding:10px;"><a class="btn btn-success col-xs-12" onclick="send('new')" ontouch="send('new')">+</a></div>
+			<div class="col-xs-8">
+				<div class="row" id="remote">
+	<!--				<a class="btn btn-primary col-xs-2" onclick="send('ir:/default/aaaa')">aaaaaa</a>
+					<a class="btn btn-primary col-xs-2" onclick="send('ir:/default/bbbb')">bbbbbb</a>
+					<a class="btn btn-primary col-xs-2" onclick="send('ir:/default/cccc')">cccccc</a>
+					<a class="btn btn-primary col-xs-2" onclick="send('ir:/default/dddd')">dddddd</a>
+					<a class="btn btn-primary col-xs-2" onclick="send('ir:/default/eeee')">eeeeee</a>
+					<a class="btn btn-primary col-xs-2" onclick="send('ir:/default/ffff')">ffffff</a>-->
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
 
-<!--<a href="#" class="btn btn-blue" onclick="send('ls:/default')">reload</a>-->
-<a href="#" class="btn btn-blue" onclick="send('new')">+</a><br><br>
-
-<div id="remote" />
 
 <!--
 <br><br>
